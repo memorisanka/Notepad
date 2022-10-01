@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %} Notepad {% endblock %}
+{% block content %}
+    <div>
+        <br>
+        <h3>Hello, {{nickname}}. This is your private NOTEPAD.</h3><br>
+    </div>
+    <div>
+        <fieldset>
+            <legend>What do you want to do:</legend>
+
+            <div>
+                <br>
+              <input type="radio" id="new_note" name="note" value="new_note"
+                     checked>
+              <label for="new_note">Add new note</label>
+            </div>
+
+            <div>
+                <br>
+              <input type="radio" id="delete_note" name="note" value="delete_note">
+              <label for="delete_note">Delete note</label>
+            </div>
+
+            <div>
+                <br>
+              <input type="radio" id="all_notes" name="note" value="all_notes">
+              <label for="all_notes">View all notes</label>
+            </div>
+
+            <div>
+                <br><br><br>
+                <button type="submit">Submit</button>
+            </div>
+        </fieldset>
+    </div>
+
+{% endblock %}
