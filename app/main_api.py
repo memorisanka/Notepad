@@ -90,12 +90,11 @@ def notepad():
         if request.method == "POST":
             result = request.form["note"]
             if result == "new_note":
-                # return redirect(url_for("add.add"))
-                return render_template("new_note.html")
+                return redirect(url_for("notepad.add"))
             elif result == "delete_note":
-                return redirect(url_for("delete.delete"))
+                return redirect(url_for("notepad.delete"))
             if result == "all_notes":
-                return redirect(url_for("view.view"))
+                return redirect(url_for("notepad.view"))
 
         return render_template("notepad.html", nickname=nickname)
 
