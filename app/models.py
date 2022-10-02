@@ -20,7 +20,7 @@ class Notes(db.Model):
     __tablename__ = 'notes'
 
     _id = db.Column(db.Integer, primary_key=True)
-    note = db.Column(db.String(80), unique=False)
+    note = db.Column(db.String(2000), unique=False)
     date = db.Column(db.Date, unique=False)
     user_id = db.Column(db.Integer, ForeignKey('users._id'))
     user = relationship("Users", backref=backref('notes', order_by=_id))

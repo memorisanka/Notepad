@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 {% block title %} Notepad {% endblock %}
 {% block content %}
-    <h1>Bla</h1>
+    <div>
+        <form method="POST">
+            <fieldset>
+                <legend>If you want to add a note, fill the form below :) </legend>
+                <p> Note: <input type="text" name="note" /></p>
+                <h6>The date will be added automatically.</h6>
+                <p><input type="submit" value="Accept" />
+            </fieldset>
+        </form>
+    </div>
 {% endblock %}
