@@ -87,21 +87,38 @@ def notepad():
     if "nick" in session:
         nickname = session["nick"]
         query = Users.query.filter_by(name=f"{nickname}").first()
-        date_of_register = query.registration_date
-
+        if request.method == "POST":
+            result = request.form["note"]
+            if result == "new_note":
+                # return redirect(url_for("add.add"))
+                return render_template("new_note.html")
+            elif result == "delete_note":
+                return redirect(url_for("delete.delete"))
+            if result == "all_notes":
+                return redirect(url_for("view.view"))
 
         return render_template("notepad.html", nickname=nickname)
+
     else:
         flash("You are not logged in!", "warning")
 
-    return redirect(url_for("login.login"))
 
+    return redirect(url_for("login.login"))
 
 
 @notepad_blueprint.route("/add", methods=["POST", "GET"])
 def add():
     return render_template("new_note.html")
 
+
+@notepad_blueprint.route("/delete", methods=["POST", "GET"])
+def delete():
+    return render_template("new_note.html")
+
+
+@notepad_blueprint.route("/view", methods=["POST", "GET"])
+def view():
+    return render_template("new_note.html")
 
 # query = Users.query.filter_by(name=f"{nickname}").first()
 #             note_date = datetime.now()

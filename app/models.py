@@ -4,7 +4,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
-
 class Users(db.Model):
     __tablename__ = 'users'
 
@@ -28,5 +27,3 @@ class Notes(db.Model):
 
     def __init__(self, note, date):
         self.note, self.date = note, date
-
-
