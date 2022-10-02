@@ -25,5 +25,5 @@ class Notes(db.Model):
     user_id = db.Column(db.Integer, ForeignKey('users._id'))
     user = relationship("Users", backref=backref('notes', order_by=_id))
 
-    def __init__(self, note, date):
-        self.note, self.date = note, date
+    def __init__(self, note, date, user_id):
+        self.note, self.date, self.user_id= note, date, user_id

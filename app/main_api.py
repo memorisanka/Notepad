@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, render_template, redirect, session, flash, url_for
 from . import db
 from .models import Users, Notes
+from sqlalchemy import select
 
 
 login_blueprint = Blueprint("login", __name__)
@@ -101,13 +102,30 @@ def notepad():
     else:
         flash("You are not logged in!", "warning")
 
-
     return redirect(url_for("login.login"))
 
 
 @notepad_blueprint.route("/add", methods=["POST", "GET"])
 def add():
-    return render_template("new_note.html")
+    if "nick" in session:
+        nickname = session["nick"]
+        query = Users.query.filter_by(name=f"{nickname}").first()
+        user_id = query._id
+        if request.method == "POST":
+            text = request.form["new_note"]
+            new_note = Notes(
+                note=text, date=datetime.now(), user_id=user_id,
+            )
+            db.session.add(new_note)
+            db.session.commit()
+            flash("Your note has been succesfully added.", "success")
+
+        return render_template("new_note.html")
+
+    else:
+        flash("You are not logged in!", "warning")
+
+    return redirect(url_for("login.login"))
 
 
 @notepad_blueprint.route("/delete", methods=["POST", "GET"])
@@ -117,7 +135,22 @@ def delete():
 
 @notepad_blueprint.route("/view", methods=["POST", "GET"])
 def view():
-    return render_template("new_note.html")
+    if "nick" in session:
+        nickname = session["nick"]
+        query = Users.query.filter_by(name=f"{nickname}").first()
+        user_id = query._id
+
+        notes = select(Notes.note, Notes.date).where(Notes.user_id == user_id)
+        result = (db.session.execute(notes))
+        for row in enumerate(result):
+            result = (f"{row}")
+
+        return render_template("view_all.html", result=result)
+
+    else:
+        flash("You are not logged in!", "warning")
+
+    return redirect(url_for("login.login"))
 
 # query = Users.query.filter_by(name=f"{nickname}").first()
 #             note_date = datetime.now()
