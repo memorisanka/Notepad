@@ -1,8 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, request, render_template, redirect, session, flash, url_for
 from . import db
-from .models import Users, Notes
-from sqlalchemy import select
+from .models import Users, Notes, NotesSchema
 
 
 login_blueprint = Blueprint("login", __name__)
@@ -12,6 +11,9 @@ register_blueprint = Blueprint("register", __name__)
 add_blueprint = Blueprint("add", __name__)
 delete_blueprint = Blueprint("delete", __name__)
 view_blueprint = Blueprint("view", __name__)
+
+note_schema = NotesSchema()
+notes_schema = NotesSchema(many=True)
 
 
 @login_blueprint.route("/", methods=["POST", "GET"])
@@ -133,28 +135,33 @@ def delete():
     return render_template("new_note.html")
 
 
-@notepad_blueprint.route("/view", methods=["POST", "GET"])
+@notepad_blueprint.route("/view", methods=["GET"])
 def view():
     if "nick" in session:
         nickname = session["nick"]
         query = Users.query.filter_by(name=f"{nickname}").first()
         user_id = query._id
-
-        notes = select(Notes.note, Notes.date).where(Notes.user_id == user_id)
-        result = (db.session.execute(notes))
-        for row in enumerate(result):
-            result = (f"{row}")
-
-        return render_template("view_all.html", result=result)
+        all_notes = Notes.query.filter_by(user_id=user_id).all()
+        return notes_schema.jsonify(all_notes)
 
     else:
         flash("You are not logged in!", "warning")
 
     return redirect(url_for("login.login"))
 
-# query = Users.query.filter_by(name=f"{nickname}").first()
-#             note_date = datetime.now()
-#
-#             return render_template("notepad.html", nickname=nickname, date=note_date)
-#         else:
-#             flash("You are not logged in!", "warning")
+    # if "nick" in session:
+    #     nickname = session["nick"]
+    #     query = Users.query.filter_by(name=f"{nickname}").first()
+    #     user_id = query._id
+    #
+    #     notes = select(Notes.note, Notes.date).where(Notes.user_id == user_id)
+    #     result = (db.session.execute(notes))
+    #     for row in enumerate(result):
+    #         result = f"{row}"
+    #
+    #     return render_template("view_all.html", result=result)
+    #
+    # else:
+    #     flash("You are not logged in!", "warning")
+    #
+    # return redirect(url_for("login.login"))
