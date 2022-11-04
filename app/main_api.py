@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, request, render_template, redirect, session, flash, url_for
 from . import db
-from .models import Users, Notes
+from .models import Users, Notes, NotesSchema
 
 
 login_blueprint = Blueprint("login", __name__)
@@ -11,6 +11,9 @@ register_blueprint = Blueprint("register", __name__)
 add_blueprint = Blueprint("add", __name__)
 delete_blueprint = Blueprint("delete", __name__)
 view_blueprint = Blueprint("view", __name__)
+
+note_schema = NotesSchema()
+notes_schema = NotesSchema(many=True)
 
 
 @login_blueprint.route("/", methods=["POST", "GET"])
@@ -87,25 +90,78 @@ def notepad():
     if "nick" in session:
         nickname = session["nick"]
         query = Users.query.filter_by(name=f"{nickname}").first()
-        date_of_register = query.registration_date
-
+        if request.method == "POST":
+            result = request.form["note"]
+            if result == "new_note":
+                return redirect(url_for("notepad.add"))
+            elif result == "delete_note":
+                return redirect(url_for("notepad.delete"))
+            if result == "all_notes":
+                return redirect(url_for("notepad.view"))
 
         return render_template("notepad.html", nickname=nickname)
+
     else:
         flash("You are not logged in!", "warning")
 
     return redirect(url_for("login.login"))
 
 
-
 @notepad_blueprint.route("/add", methods=["POST", "GET"])
 def add():
+    if "nick" in session:
+        nickname = session["nick"]
+        query = Users.query.filter_by(name=f"{nickname}").first()
+        user_id = query._id
+        if request.method == "POST":
+            text = request.form["new_note"]
+            new_note = Notes(
+                note=text, date=datetime.now(), user_id=user_id,
+            )
+            db.session.add(new_note)
+            db.session.commit()
+            flash("Your note has been succesfully added.", "success")
+
+        return render_template("new_note.html")
+
+    else:
+        flash("You are not logged in!", "warning")
+
+    return redirect(url_for("login.login"))
+
+
+@notepad_blueprint.route("/delete", methods=["POST", "GET"])
+def delete():
     return render_template("new_note.html")
 
 
-# query = Users.query.filter_by(name=f"{nickname}").first()
-#             note_date = datetime.now()
-#
-#             return render_template("notepad.html", nickname=nickname, date=note_date)
-#         else:
-#             flash("You are not logged in!", "warning")
+@notepad_blueprint.route("/view", methods=["GET"])
+def view():
+    if "nick" in session:
+        nickname = session["nick"]
+        query = Users.query.filter_by(name=f"{nickname}").first()
+        user_id = query._id
+        all_notes = Notes.query.filter_by(user_id=user_id).all()
+        return notes_schema.jsonify(all_notes)
+
+    else:
+        flash("You are not logged in!", "warning")
+
+    return redirect(url_for("login.login"))
+
+    # if "nick" in session:
+    #     nickname = session["nick"]
+    #     query = Users.query.filter_by(name=f"{nickname}").first()
+    #     user_id = query._id
+    #
+    #     notes = select(Notes.note, Notes.date).where(Notes.user_id == user_id)
+    #     result = (db.session.execute(notes))
+    #     for row in enumerate(result):
+    #         result = f"{row}"
+    #
+    #     return render_template("view_all.html", result=result)
+    #
+    # else:
+    #     flash("You are not logged in!", "warning")
+    #
+    # return redirect(url_for("login.login"))
